@@ -1,19 +1,18 @@
-
-
 import nltk
-import torch
 import numpy as np
+import torch
 from nltk.sentiment import SentimentIntensityAnalyzer
 
-# Importa funzioni comuni
+# Importa i metodi comuni
 from common_functions import (
     device,
     shared_count_pos_tags,
     shared_count_sensitive_words,
-    shared_generate_batch_embeddings,
+    shared_generate_single_embedding,
     sia
 )
 
+# Lista di parole sensibili
 SENSITIVE_WORDS = [
     "war", "violence", "terrorism", "racism", "sexism", "discrimination",
     "abortion", "religion", "politics", "LGBTQ", "poverty", "inequality",
@@ -51,41 +50,45 @@ SENSITIVE_WORDS = [
     "concentration_camp", "child_abuse", "forced_displacement", "refugee_crisis"
 ]
 
+
 def count_pos_tags(text, pos_tags):
     return shared_count_pos_tags(text, pos_tags)
 
 def count_sensitive_words(text):
     return shared_count_sensitive_words(text, SENSITIVE_WORDS)
 
-def generate_bert_embeddings(texts, batch_size=32):
-    return shared_generate_batch_embeddings(texts, batch_size=batch_size)
+def generate_bert_embedding_single(text):
+    return shared_generate_single_embedding(text)
 
-def extract_features(data):
+def extract_features_single(question_en):
     """
-    Estrae feature sintattiche (senza num_words) + sentiment + embedding BERT
-    da un DataFrame 'data' con colonna 'question_en'.
+    Estrae le feature da una singola domanda (sintattiche + BERT).
     """
-    # Assicuriamoci che question_en sia stringa
-    data["question_en"] = data["question_en"].fillna("").astype(str)
+    # Assicuriamoci che question_en sia una stringa
+    question_en = str(question_en)
 
-    data["num_unique_words"] = data["question_tokenized"].apply(lambda x: len(set(x)))
-    data["num_verbs"] = data["question_en"].apply(lambda x: count_pos_tags(x, ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ"]))
-    data["num_adjectives"] = data["question_en"].apply(lambda x: count_pos_tags(x, ["JJ", "JJR", "JJS"]))
-    data["num_nouns"] = data["question_en"].apply(lambda x: count_pos_tags(x, ["NN", "NNS", "NNP", "NNPS"]))
-    data["num_sensitive_words"] = data["question_en"].apply(lambda x: count_sensitive_words(x))
+    num_unique_words = len(set(nltk.word_tokenize(question_en)))
+    num_verbs = count_pos_tags(question_en, ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ"])
+    num_adjectives = count_pos_tags(question_en, ["JJ", "JJR", "JJS"])
+    num_nouns = count_pos_tags(question_en, ["NN", "NNS", "NNP", "NNPS"])
+    num_sensitive = count_sensitive_words(question_en)
 
-    # Calcolo del sentiment (compound) - usiamo 'sia' importato da common_functions
-    data["sentiment"] = data["question_en"].apply(lambda x: sia.polarity_scores(x)["compound"])
+    # Sentiment
+    sentiment = sia.polarity_scores(question_en)["compound"]
 
-    # Generiamo gli embedding BERT in batch
-    bert_embeddings = generate_bert_embeddings(data["question_en"])
+    # Feature sintattiche/semantiche
+    syntactic_semantic = np.array([
+        num_unique_words,
+        num_verbs,
+        num_adjectives,
+        num_nouns,
+        num_sensitive,
+        sentiment
+    ]).reshape(1, -1)
 
-    # Concatenazione feature sintattiche/semantiche + BERT
-    syntactic_semantic_features = data[
-        ["num_unique_words", "num_verbs", "num_adjectives", "num_nouns", "num_sensitive_words", "sentiment"]
-    ].values
+    # BERT embedding (768 dimensioni)
+    bert_emb = generate_bert_embedding_single(question_en)  # (1, 768)
 
-    features = np.hstack([syntactic_semantic_features, bert_embeddings])
-    labels = data["sensitive?"].values
-
-    return features, labels
+    # Concatenazione finale
+    features = np.hstack([syntactic_semantic, bert_emb])
+    return features
