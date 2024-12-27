@@ -1,3 +1,15 @@
+import json
+
+# Funzione per caricare le domande dal file json
+def load_questions_from_json(file_path):
+    """Load questions and sensitivity labels from a JSON file."""
+    with open(file_path, 'r', encoding='utf-8') as file:
+        data = json.load(file)
+    sensitive = [item["question_en"] for item in data if item["sensitive?"] == 1]
+    non_sensitive = [item["question_en"] for item in data if item["sensitive?"] == 0]
+    return sensitive, non_sensitive
+
+
 if __name__ == "__main__":
     """Inizio funzione clustering."""
 
@@ -15,3 +27,5 @@ if __name__ == "__main__":
 
     # Step 1: Inizio caricamento delle domande
     print("Caricamento delle domande dal JSON...")
+
+    sensitive_questions, non_sensitive_questions = load_questions_from_json(file_path)
