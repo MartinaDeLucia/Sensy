@@ -44,6 +44,11 @@ SENSITIVE_WORDS = [
     "human_rights_abuse", "war_crime", "crime_against_humanity", "re-education_camp",
     "concentration_camp", "child_abuse", "forced_displacement", "refugee_crisis"
 ]
+
+# device per BERT (MPS se disponibile, altrimenti CPU)
+
+device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+
 def extract_features(data):
     """
     Estrae feature sintattiche (senza num_words) + sentiment + embedding BERT.

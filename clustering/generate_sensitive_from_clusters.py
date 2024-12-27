@@ -28,7 +28,29 @@ def generate_sensitive_json(statistics_file, clusters_file, output_file):
     )
     num_noise_questions = total_clustered_questions // total_clusters
 
+    # Peparo la lista di output
+    output_data = []
 
+    # Aggiungo tutte le domande dai cluster senza rumore all'output
+
+    for cluster_id, questions in clusters.items():
+        if cluster_id != "-1":  # Exclude noise
+            for question in questions:
+                output_data.append({"question_en": question, "sensitive?": 1})
+
+    # Seleziono un sottoset delle domande con rumore (la media)
+    noise_questions = clusters.get("-1", [])
+    selected_noise_questions = random.sample(noise_questions, min(num_noise_questions, len(noise_questions)))
+
+    # Aggiungo le domande con rumore all'output
+    for question in selected_noise_questions:
+        output_data.append({"question_en": question, "sensitive?": 1})
+
+    # Salvo nel json
+    with open(output_file, 'w', encoding='utf-8') as file:
+        json.dump(output_data, file, indent=4, ensure_ascii=False)
+
+    print(f"Generated JSON saved to {output_file}.")
 
 if __name__ == "__main__":
     statistics_file = "export/sensitive_statistics.json"  # Path al JSON di statistiche
