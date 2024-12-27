@@ -1,16 +1,12 @@
-# This is a sample Python script.
+if __name__ == "__main__":
+    # Configurazione hardcoded
+    # questo usa un test-set in un file a parte.
+    TRAIN_RATIO = 1.0  # Percentuale di dati di training principale da usare
+    TEST_RATIO = 1.0   # Percentuale di dati di test da usare
+    ADDITIONAL_TRAIN_RATIOS = [0.2, 0.4, 0.6, 0.8, 1.0]  # Percentuali del dataset aggiuntivo
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+    train_path = "data/question_train_clustered_output.json"
+    additional_train_path = "data/normalized_chatgpt_questions.json"
+    test_path = "data/question_test.json"
 
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    print("Caricamento e pulizia del dataset di training principale...")
