@@ -1,6 +1,33 @@
 import json
 import random
 
+
+def generate_non_sensitive_json(clusters_file, output_file):
+    """
+    Genero un JSON file con tutte le domande non sensitive,
+    includendo il rumore, e settando "sensitive?": 0.
+
+    """
+    # Load the cluster data
+    with open(clusters_file, 'r', encoding='utf-8') as file:
+        clusters = json.load(file)
+
+    # Prepare the output list
+    output_data = []
+
+    # Add all questions from all clusters, including noise
+    for cluster_id, questions in clusters.items():
+        for question in questions:
+            output_data.append({"question_en": question, "sensitive?": 0})
+
+    # Save the output to a JSON file
+    with open(output_file, 'w', encoding='utf-8') as file:
+        json.dump(output_data, file, indent=4, ensure_ascii=False)
+
+    print(f"Generated JSON saved to {output_file}.")
+    return output_data
+
+
 def generate_sensitive_json(statistics_file, clusters_file, output_file):
     """
     Genero un JSON file contenente tutte le domande dai cluster e un sottoset di domande dal rumore
@@ -51,10 +78,26 @@ def generate_sensitive_json(statistics_file, clusters_file, output_file):
         json.dump(output_data, file, indent=4, ensure_ascii=False)
 
     print(f"Generated JSON saved to {output_file}.")
+    return output_data
+
 
 if __name__ == "__main__":
-    statistics_file = "export/sensitive_statistics.json"  # Path al JSON di statistiche
-    clusters_file = "export/sensitive_clusters.json"  # Path al JSON dei cluster
-    output_file = "export/question_train_sensitive_clustered_output.json"  # Path all'output
+    statistics_file = "export/sensitive_statistics.json"  # Path al JSON di statistiche dei cluster sensitive
+    clusters_file = "export/sensitive_clusters.json"  # Path al JSON dei cluster sensitive
+    output_sensitive_file = "export/question_train_sensitive_clustered_output.json"  # Path all'output
 
-    generate_sensitive_json(statistics_file, clusters_file, output_file)
+    output_sensitive = generate_sensitive_json(statistics_file, clusters_file, output_sensitive_file)
+
+    clusters_file = "export/non_sensitive_clusters.json"  # Path al JSON dei cluster non-sensitive
+    output_nonsensitive_file = "export/question_train_nonsensitive_clustered_output.json"  # Path al JSON di output dei cluster non-sensitive
+
+    output_nonsensitive = generate_non_sensitive_json(clusters_file, output_nonsensitive_file)
+
+    output_total_file = "export/total_clusters_question_train.json"
+
+    total_data = output_nonsensitive + output_sensitive
+
+    with open(output_total_file, 'w', encoding='utf-8') as file:
+        json.dump(total_data, file, indent=4, ensure_ascii=False)
+
+    print(f"Generated Total JSON saved to {output_total_file}.")
