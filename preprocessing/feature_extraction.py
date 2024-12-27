@@ -1,3 +1,4 @@
+import nltk
 
 # Lista di parole sensibili
 SENSITIVE_WORDS = [
@@ -36,3 +37,26 @@ SENSITIVE_WORDS = [
     "human_rights_abuse", "war_crime", "crime_against_humanity", "re-education_camp",
     "concentration_camp", "child_abuse", "forced_displacement", "refugee_crisis"
 ]
+def extract_features(data):
+    """
+    Estrae feature sintattiche (senza num_words) + sentiment + embedding BERT.
+    Non utilizza TF-IDF, BoW.
+    """
+    # Assicuriamoci che question_en sia stringa
+    data["question_en"] = data["question_en"].fillna("").astype(str)
+
+    data["num_unique_words"] = data["question_tokenized"].apply(lambda x: len(set(x)))
+    data["num_verbs"] = data["question_en"].apply(lambda x: count_pos_tags(x, ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ"]))
+    data["num_adjectives"] = data["question_en"].apply(lambda x: count_pos_tags(x, ["JJ", "JJR", "JJS"]))
+    data["num_nouns"] = data["question_en"].apply(lambda x: count_pos_tags(x, ["NN", "NNS", "NNP", "NNPS"]))
+    data["num_sensitive_words"] = data["question_en"].apply(count_sensitive_words)
+
+
+def count_pos_tags(text, pos_tags):
+    tokens = nltk.word_tokenize(text)
+    tagged = nltk.pos_tag(tokens)
+    return sum(1 for word, tag in tagged if tag in pos_tags)
+
+def count_sensitive_words(text):
+    tokens = nltk.word_tokenize(text.lower())
+    return sum(1 for token in tokens if token in SENSITIVE_WORDS)
