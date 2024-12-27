@@ -64,6 +64,19 @@ def generate_statistics(clusters):
     }
     return stats
 
+# Funzione per salvare i cluster in un file JSON
+def save_clusters_to_file(clusters, output_file):
+    clusters_str_keys = {str(key): value for key, value in clusters.items()}
+    with open(output_file, 'w', encoding='utf-8') as file:
+        json.dump(clusters_str_keys, file, indent=4, ensure_ascii=False)
+    print(f"Clusters salvati al percorso:  {output_file}")
+
+# Funzione per salvare le statistiche in un file JSON
+def save_statistics_to_file(stats, output_file):
+    with open(output_file, 'w', encoding='utf-8') as file:
+        json.dump(stats, file, indent=4, ensure_ascii=False)
+    print(f"Statistiche dei cluster salvate al percorso: {output_file}")
+
 if __name__ == "__main__":
     """Inizio funzione clustering."""
 
@@ -102,3 +115,6 @@ if __name__ == "__main__":
     sensitive_clusters = organize_clusters(sensitive_labels, sensitive_questions)
     non_sensitive_stats = generate_statistics(non_sensitive_clusters)
     sensitive_stats = generate_statistics(sensitive_clusters)
+    save_clusters_to_file(non_sensitive_clusters, non_sensitive_clusters_file)
+    save_statistics_to_file(non_sensitive_stats, non_sensitive_stats_file)
+    print("\nClustering completato per le domande sensitive e non sensitive con successo.")
