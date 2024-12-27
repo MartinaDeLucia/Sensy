@@ -1,3 +1,5 @@
+from preprocessing.clean_data import clean_dataset
+
 if __name__ == "__main__":
     # Configurazione hardcoded
     # questo usa un test-set in un file a parte.
@@ -10,3 +12,16 @@ if __name__ == "__main__":
     test_path = "data/question_test.json"
 
     print("Caricamento e pulizia del dataset di training principale...")
+    train_data = clean_dataset(train_path)
+
+    print("Caricamento e pulizia del dataset di test...")
+    test_data = clean_dataset(test_path)
+
+    print("Caricamento e pulizia del dataset di training aggiuntivo...")
+    additional_train_data = clean_dataset(additional_train_path)
+
+    # Risultati finali
+    results = []
+
+    
+    
