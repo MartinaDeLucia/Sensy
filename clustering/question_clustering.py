@@ -117,4 +117,6 @@ if __name__ == "__main__":
     sensitive_stats = generate_statistics(sensitive_clusters)
     save_clusters_to_file(non_sensitive_clusters, non_sensitive_clusters_file)
     save_statistics_to_file(non_sensitive_stats, non_sensitive_stats_file)
+    save_clusters_to_file(sensitive_clusters, sensitive_clusters_file)
+    save_statistics_to_file(sensitive_stats, sensitive_stats_file)
     print("\nClustering completato per le domande sensitive e non sensitive con successo.")
