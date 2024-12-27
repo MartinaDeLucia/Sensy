@@ -1,8 +1,10 @@
 import json
 
-from sentence_transformers import SentenceTransformer
+import numpy as np
 from sklearn.decomposition import PCA
-
+import hdbscan
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_distances
 
 # Funzione per codificare le domande negli embeddings di Sentence-BERT
 def encode_questions(questions, model_name='all-MiniLM-L6-v2'):
@@ -23,6 +25,18 @@ def load_questions_from_json(file_path):
 def reduce_dimensions(embeddings, n_components=50):
     pca = PCA(n_components=n_components, random_state=42)
     return pca.fit_transform(embeddings)
+
+# Funzione per fare il clustering tramite HDBScan utilizzando la distanza in coseno
+def perform_clustering(embeddings, min_cluster_size=50, min_samples=5):
+    distance_matrix = cosine_distances(embeddings)
+    distance_matrix = np.asarray(distance_matrix, dtype=np.float64)
+    clusterer = hdbscan.HDBSCAN(
+        min_cluster_size=min_cluster_size,
+        min_samples=min_samples,
+        metric='precomputed',
+        cluster_selection_method='eom'
+    )
+    return clusterer.fit_predict(distance_matrix)
 
 
 if __name__ == "__main__":
@@ -46,6 +60,13 @@ if __name__ == "__main__":
     sensitive_questions, non_sensitive_questions = load_questions_from_json(file_path)
 
     # Step 2 : Elaborazione delle domande sensitive
-
+    print("Elaborando domande sensitive...")
     sensitive_embeddings = encode_questions(sensitive_questions)
     reduced_sensitive_embeddings = reduce_dimensions(sensitive_embeddings)
+    sensitive_labels = perform_clustering(reduced_sensitive_embeddings)
+
+    # Step 3 : Elaborazione delle domande non sensitive
+    print("Elaborando domande non sensitive...")
+    non_sensitive_embeddings = encode_questions(non_sensitive_questions)
+    reduced_non_sensitive_embeddings = reduce_dimensions(non_sensitive_embeddings)
+    non_sensitive_labels = perform_clustering(reduced_non_sensitive_embeddings)
