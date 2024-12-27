@@ -40,6 +40,14 @@ if __name__ == "__main__":
 
         # Combinare il dataset principale bilanciato con il dataset aggiuntivo
         df_train_final = pd.concat([train_data, df_add_balanced], ignore_index=True)
+
+        # Estrazione delle feature
+        print("Estrazione delle feature dal training set combinato...")
+        train_features, train_labels = extract_features(df_train_final)
+
+        print("Estrazione delle feature dal test set...")
+        # test_features, test_labels = extract_features(df_test_balanced)
+        test_features, test_labels = extract_features(test_data)
               
 
 
