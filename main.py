@@ -1,4 +1,5 @@
 from preprocessing.clean_data import clean_dataset
+import pandas as pd
 
 if __name__ == "__main__":
     # Configurazione hardcoded
@@ -22,6 +23,35 @@ if __name__ == "__main__":
 
     # Risultati finali
     results = []
+
+    for ratio in ADDITIONAL_TRAIN_RATIOS:
+        REPORT_PATH = f"samples/report/report_squaretestset_{ratio}_new.json"
+        print(f"\n==> Inizio allenamento con ADDITIONAL_TRAIN_RATIO={ratio}...\n")
+
+        # Suddivisione in base alla classe per il dataset aggiuntivo
+        df_add_zero = additional_train_data[additional_train_data["sensitive?"] == 0]
+        df_add_one = additional_train_data[additional_train_data["sensitive?"] == 1]
+
+        min_add_count = min(len(df_add_zero), len(df_add_one))
+        df_add_zero_bal = df_add_zero.sample(min_add_count, random_state=42)
+        df_add_one_bal = df_add_one.sample(min_add_count, random_state=42)
+        df_add_balanced = pd.concat([df_add_zero_bal, df_add_one_bal], ignore_index=True)
+        df_add_balanced = df_add_balanced.sample(frac=ratio, random_state=42).reset_index(drop=True)
+
+        # Combinare il dataset principale bilanciato con il dataset aggiuntivo
+        df_train_final = pd.concat([train_data, df_add_balanced], ignore_index=True)
+
+        # Estrazione delle feature
+        print("Estrazione delle feature dal training set combinato...")
+        train_features, train_labels = extract_features(df_train_final)
+
+        print("Estrazione delle feature dal test set...")
+        # test_features, test_labels = extract_features(df_test_balanced)
+        test_features, test_labels = extract_features(test_data)
+              
+
+
+              
 
     
     

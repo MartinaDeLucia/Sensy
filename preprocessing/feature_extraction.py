@@ -1,3 +1,11 @@
+from transformers import BertTokenizer, BertModel
+import nltk
+import torch
+import numpy as np
+from nltk.sentiment import SentimentIntensityAnalyzer
+
+# Istanzia il SentimentIntensityAnalyzer
+sia = SentimentIntensityAnalyzer()
 
 # Lista di parole sensibili
 SENSITIVE_WORDS = [
@@ -36,3 +44,64 @@ SENSITIVE_WORDS = [
     "human_rights_abuse", "war_crime", "crime_against_humanity", "re-education_camp",
     "concentration_camp", "child_abuse", "forced_displacement", "refugee_crisis"
 ]
+def extract_features(data):
+    """
+    Estrae feature sintattiche (senza num_words) + sentiment + embedding BERT.
+    Non utilizza TF-IDF, BoW.
+    """
+    # Assicuriamoci che question_en sia stringa
+    data["question_en"] = data["question_en"].fillna("").astype(str)
+
+    data["num_unique_words"] = data["question_tokenized"].apply(lambda x: len(set(x)))
+    data["num_verbs"] = data["question_en"].apply(lambda x: count_pos_tags(x, ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ"]))
+    data["num_adjectives"] = data["question_en"].apply(lambda x: count_pos_tags(x, ["JJ", "JJR", "JJS"]))
+    data["num_nouns"] = data["question_en"].apply(lambda x: count_pos_tags(x, ["NN", "NNS", "NNP", "NNPS"]))
+    data["num_sensitive_words"] = data["question_en"].apply(count_sensitive_words)
+
+    # Calcolo del sentiment (compound)
+    data["sentiment"] = data["question_en"].apply(lambda x: sia.polarity_scores(x)["compound"])
+
+    # BERT embeddings
+    bert_embeddings = generate_bert_embeddings(data["question_en"])
+
+    # Feature finali: num_unique_words, num_verbs, num_adjectives, num_nouns, num_sensitive_words, sentiment + BERT
+    syntactic_semantic_features = data[
+        ["num_unique_words", "num_verbs", "num_adjectives", "num_nouns", "num_sensitive_words", "sentiment"]
+    ].values
+
+    features = np.hstack([syntactic_semantic_features, bert_embeddings])
+    labels = data["sensitive?"].values
+
+    return features, labels
+
+
+def count_pos_tags(text, pos_tags):
+    tokens = nltk.word_tokenize(text)
+    tagged = nltk.pos_tag(tokens)
+    return sum(1 for word, tag in tagged if tag in pos_tags)
+
+def count_sensitive_words(text):
+    tokens = nltk.word_tokenize(text.lower())
+    return sum(1 for token in tokens if token in SENSITIVE_WORDS)
+def generate_bert_embeddings(texts, batch_size=32):
+    tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+    model = BertModel.from_pretrained("bert-base-uncased")
+    model.to(device)
+    model.eval()
+
+    embeddings = []
+    for i in range(0, len(texts), batch_size):
+        batch_texts = texts[i:i+batch_size]
+        # Assicurati che siano stringhe
+        batch_texts = [str(t) for t in batch_texts]
+
+        inputs = tokenizer(batch_texts, return_tensors="pt", padding=True, truncation=True, max_length=128)
+        inputs = {k: v.to(device) for k,v in inputs.items()}
+        with torch.no_grad():
+            outputs = model(**inputs)
+        # Estrazione della [CLS] embedding per ogni frase (senza mean)
+        cls_emb = outputs.last_hidden_state[:, 0, :].cpu().numpy()
+        embeddings.append(cls_emb)
+
+    embeddings = np.vstack(embeddings)
+    return embeddings
