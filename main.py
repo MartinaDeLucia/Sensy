@@ -1,5 +1,11 @@
+from models.evaluate_model import evaluate_model
+from models.train_model import train_model
 from preprocessing.clean_data import clean_dataset
 import pandas as pd
+import pickle
+import json
+
+from preprocessing.feature_extraction import extract_features
 
 if __name__ == "__main__":
     # Configurazione hardcoded
@@ -46,8 +52,43 @@ if __name__ == "__main__":
         train_features, train_labels = extract_features(df_train_final)
 
         print("Estrazione delle feature dal test set...")
-        # test_features, test_labels = extract_features(df_test_balanced)
         test_features, test_labels = extract_features(test_data)
+
+        # Addestramento del modello
+        print("Addestramento del modello sul training set combinato...")
+        model, _, _ = train_model(train_features, train_labels, split=False)
+
+        # Valutazione sul test set
+        print("Valutazione del modello sul test set bilanciato...")
+        report = evaluate_model(model, test_features, test_labels, print_report=True)
+
+        # Salvataggio del modello
+        model_path = f"samples/model_ratio_{ratio}.pkl"
+        with open(model_path, "wb") as f:
+            pickle.dump(model, f)
+
+        # Salvataggio del risultato
+        accuracy = report["accuracy"]
+        print(f"Accuratezza con ADDITIONAL_TRAIN_RATIO={ratio}: {accuracy:.4f}")
+
+        # Salvataggio del modello
+        model_path = f"samples/models/model_square_testset_ratio_{ratio}.pkl"
+        with open(model_path, "wb") as f:
+            pickle.dump(model, f)
+
+        # Salvataggio del risultato
+        results.append({"additional_train_ratio": ratio, "accuracy": accuracy})
+
+        print(f"Salvataggio del report in {REPORT_PATH}...")
+        with open(REPORT_PATH, "w") as f:
+            json.dump(report, f, indent=4)
+
+        # Salvataggio dei risultati
+    results_df = pd.DataFrame(results)
+    results_csv_path = "samples/results/training_results.csv"
+    results_df.to_csv(results_csv_path, index=False)
+
+    print("\n==> Tutti i modelli addestrati e risultati salvati con successo!")
               
 
 
