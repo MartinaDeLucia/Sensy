@@ -38,6 +38,31 @@ def perform_clustering(embeddings, min_cluster_size=50, min_samples=5):
     )
     return clusterer.fit_predict(distance_matrix)
 
+# Funzione per organizzare le domande in base alle labels dei cluster
+def organize_clusters(labels, questions):
+    clusters = {}
+    for idx, label in enumerate(labels):
+        if label not in clusters:
+            clusters[label] = []
+        clusters[label].append(questions[idx])
+    return clusters
+
+
+# Funzione per generare delle statistiche sui cluster
+# Domande totali
+# Numero di cluster
+# Punti di rumore
+# Numero di domande per cluster
+
+def generate_statistics(clusters):
+    num_clusters = len(clusters) - (1 if -1 in clusters else 0)  # Exclude noise (-1)
+    stats = {
+        "total_questions": sum(len(questions) for questions in clusters.values()),
+        "number_of_clusters": num_clusters,
+        "noise_points": len(clusters[-1]) if -1 in clusters else 0,
+        "questions_per_cluster": {str(key): len(value) for key, value in clusters.items()}
+    }
+    return stats
 
 if __name__ == "__main__":
     """Inizio funzione clustering."""
@@ -70,3 +95,10 @@ if __name__ == "__main__":
     non_sensitive_embeddings = encode_questions(non_sensitive_questions)
     reduced_non_sensitive_embeddings = reduce_dimensions(non_sensitive_embeddings)
     non_sensitive_labels = perform_clustering(reduced_non_sensitive_embeddings)
+
+    #Step 4: Organizzo domande tramite le label dei cluster...
+    print("Organizzazione domande...")
+    non_sensitive_clusters = organize_clusters(non_sensitive_labels, non_sensitive_questions)
+    sensitive_clusters = organize_clusters(sensitive_labels, sensitive_questions)
+    non_sensitive_stats = generate_statistics(non_sensitive_clusters)
+    sensitive_stats = generate_statistics(sensitive_clusters)
