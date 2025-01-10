@@ -1,6 +1,16 @@
-![Sensy logo](img/img.png "SENSY")
+![Sensy logo](img/logo.jpg "SENSY")
+
 # README - Pipeline di Clustering e Classificazione per Domande Sensitive
 
+## Obiettivo del Progetto
+
+SensY è un modello di machine learning: un classificatore il cui obiettivo è predire il valore della variabile dipendente "SENSITIVE", sulla base di un training set, ovvero un insieme di questions per le quali la variabile dipendente è nota.
+La variabile dipendente può assumere due valori:
+
+1. **SI**, se l'istanza analizzata è sensitive;
+2. **NO**, se l'istanza analizzata non è sensitive.
+
+SensY, impegnandosi, quindi, a classificare prompt come sensibili o non sensibili, riduce la complessità del possibile successivo lavoro di riformulazione dei prompt, ponendo la base per un' interessante, articolata e ambiziosa attività sulla fairness e sull'eticità dell'interazione con un LLM.
 ## Descrizione del Progetto
 
 Questo progetto fornisce una pipeline **end-to-end** per individuare e classificare domande “**sensitive**” (ad esempio contenenti contenuti violenti, discriminatori o simili) o “non-sensitive”. I principali step della pipeline sono:
