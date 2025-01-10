@@ -14,7 +14,7 @@ if __name__ == "__main__":
     TEST_RATIO = 1.0   # Percentuale di dati di test da usare
     ADDITIONAL_TRAIN_RATIOS = [0.2, 0.4, 0.6, 0.8, 1.0]  # Percentuali del dataset aggiuntivo
 
-    train_path = "data/question_train_clustered_output.json"
+    train_path = "clustering/export/total_clusters_question_train.json"
     additional_train_path = "data/normalized_chatgpt_questions.json"
     test_path = "data/question_test.json"
 
@@ -61,11 +61,6 @@ if __name__ == "__main__":
         # Valutazione sul test set
         print("Valutazione del modello sul test set bilanciato...")
         report = evaluate_model(model, test_features, test_labels, print_report=True)
-
-        # Salvataggio del modello
-        model_path = f"samples/model_ratio_{ratio}.pkl"
-        with open(model_path, "wb") as f:
-            pickle.dump(model, f)
 
         # Salvataggio del risultato
         accuracy = report["accuracy"]

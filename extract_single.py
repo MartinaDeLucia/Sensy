@@ -1,11 +1,8 @@
 import nltk
 import numpy as np
-import torch
-from nltk.sentiment import SentimentIntensityAnalyzer
 
 # Importa i metodi comuni
 from common_functions import (
-    device,
     shared_count_pos_tags,
     shared_count_sensitive_words,
     shared_generate_single_embedding,

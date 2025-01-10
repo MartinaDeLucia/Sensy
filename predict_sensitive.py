@@ -4,7 +4,7 @@ from extract_single import extract_features_single
 
 if __name__ == "__main__":
     samples_dir = "samples/models"
-    best_model_path = os.path.join(samples_dir, "model_chatgpt_testset_ratio_1.0.pkl")
+    best_model_path = os.path.join(samples_dir, "model_square_testset_ratio_1.0.pkl")
 
     # Carichiamo solo il modello, poiché non utilizziamo più TF-IDF e BoW
     with open(best_model_path, "rb") as f:
