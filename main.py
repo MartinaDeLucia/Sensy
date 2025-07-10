@@ -17,8 +17,8 @@ if __name__ == "__main__":
     ADDITIONAL_TRAIN_RATIOS = [0.2, 0.4, 0.6, 0.8, 1.0]
 
     train_path = "clustering/export/total_clusters_question_train.json"
-    additional_train_path = "data/normalized_chatgpt_questions.json"  # o "data_improvement/dataset.json" "data/normalized_chatgpt_questions.json"
-    test_path =  "data_improvement/dataset.json" # o "data_improvement/dataset.json" "data/question_test.json"
+    additional_train_path = "data/normalized_chatgpt_questions.json"  # o "data_improvement/dataset_chatbot_arena.json" "data/normalized_chatgpt_questions.json"
+    test_path =  "data_improvement/dataset_chatbot_arena.json" # o "data_improvement/dataset_chatbot_arena.json" "data/question_test.json"
 
     os.makedirs("samples/errors", exist_ok=True)
 
