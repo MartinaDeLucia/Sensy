@@ -32,21 +32,21 @@ if __name__ == "__main__":
     additional_train_data = clean_dataset(additional_train_path)
 
     # Bilancia il dataset aggiuntivo se necessario
-    label_counts = additional_train_data["sensitive?"].value_counts()
-    if 0 in label_counts and 1 in label_counts and abs(label_counts[0] - label_counts[1]) > 100:
-        print(f"Il dataset aggiuntivo è sbilanciato: {label_counts.to_dict()}")
-        print("Bilanciamento in corso...")
+    #label_counts = additional_train_data["sensitive?"].value_counts()
+    #if 0 in label_counts and 1 in label_counts and abs(label_counts[0] - label_counts[1]) > 100:
+    #    print(f"Il dataset aggiuntivo è sbilanciato: {label_counts.to_dict()}")
+    #    print("Bilanciamento in corso...")
 
-        df_add_zero = additional_train_data[additional_train_data["sensitive?"] == 0]
-        df_add_one = additional_train_data[additional_train_data["sensitive?"] == 1]
+#        df_add_zero = additional_train_data[additional_train_data["sensitive?"] == 0]
+ #       df_add_one = additional_train_data[additional_train_data["sensitive?"] == 1]
+#
+ #       min_len = min(len(df_add_zero), len(df_add_one))
+  #      df_add_zero_bal = df_add_zero.sample(min_len, random_state=42)
+   #     df_add_one_bal = df_add_one.sample(min_len, random_state=42)
 
-        min_len = min(len(df_add_zero), len(df_add_one))
-        df_add_zero_bal = df_add_zero.sample(min_len, random_state=42)
-        df_add_one_bal = df_add_one.sample(min_len, random_state=42)
-
-        additional_train_data = pd.concat([df_add_zero_bal, df_add_one_bal], ignore_index=True).sample(frac=1, random_state=42)
-    else:
-        print("Il dataset aggiuntivo è già bilanciato.")
+    #    additional_train_data = pd.concat([df_add_zero_bal, df_add_one_bal], ignore_index=True).sample(frac=1, random_state=42)
+    #else:
+     #   print("Il dataset aggiuntivo è già bilanciato.")
 
     results = []
 

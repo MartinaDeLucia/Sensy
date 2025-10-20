@@ -14,8 +14,8 @@ def clean_dataset(file_path):
     print(f"Prima della pulizia di {file_path} sono: {df.count()}")
 
     # Rimuovi duplicati
-    df = df.drop_duplicates()
-    print(f"Dopo la pulizia di {file_path} sono: {df.count()}")
+    #df = df.drop_duplicates()
+    #print(f"Dopo la pulizia di {file_path} sono: {df.count()}")
 
     # Se esiste la colonna 'question', eliminala
     if 'question' in df.columns:
